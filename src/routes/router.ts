@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUserById } from "./handlers/users";
+import { createUser, getUserById } from "./handlers/users";
 
 const router = Router();
 
@@ -7,5 +7,6 @@ const router = Router();
  * User Routes
  */
 router.get("/users/:id", getUserById);
+router.post("/users", createUser);
 
 export default router;
