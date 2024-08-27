@@ -3,7 +3,8 @@ import { JTDDataType } from "ajv/dist/core";
 import { User } from "src/database/models/user.model";
 import { Request, Response } from "express";
 import { sendError, sendResponse } from "src/utils/responses";
-import { validate } from 'uuid';
+import { validate } from "uuid";
+import { Exercise } from "src/database/models/exercise.model";
 
 const ajv = new Ajv();
 
@@ -19,7 +20,10 @@ export async function getUserById(
     return sendError(res, 400, "Invalid user ID");
   }
 
-  const user = await User.findOne({ where: { id: req.params.id } });
+  const user = await User.findOne({
+    where: { id: req.params.id },
+    attributes: { exclude: ["password", "email"] },
+  });
 
   if (!user) {
     return sendError(res, 404, "User not found");

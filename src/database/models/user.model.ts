@@ -2,8 +2,10 @@ import {
   InferAttributes,
   InferCreationAttributes,
   CreationOptional,
+  NonAttribute,
 } from "sequelize";
-import {Model, Column, DataType, Table } from "sequelize-typescript";
+import {Model, Column, DataType, Table, HasMany } from "sequelize-typescript";
+import { Exercise } from "./exercise.model";
 
 @Table({ tableName: "users" })
 export class User extends Model<
@@ -25,4 +27,7 @@ export class User extends Model<
 
   @Column({ type: DataType.STRING })
   declare password: string;
+
+  @HasMany(() => Exercise)
+  declare exercises?: NonAttribute<Exercise[]>;
 }
