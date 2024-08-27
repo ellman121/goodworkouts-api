@@ -12,6 +12,5 @@
       "src/*": ["./src/*"]
     },
     "strict": true,
-    "target": "es6",
   }
 }

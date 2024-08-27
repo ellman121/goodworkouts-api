@@ -4,9 +4,13 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias -p tsconfig.json",
+    "dev": "run-p dev:watch dev:watchAliases dev:serve",
+    "dev:watch": "tsc -w",
+    "dev:watchAliases": "tsc-alias -w -p tsconfig.json",
+    "dev:serve": "nodemon build/index.js",
     "test": "jest",
-    "run": "node build/index.js",
+    "start": "node build/index.js",
     "migrations:create": "npx sequelize-cli db:migrate",
     "migrations:down": "npx sequelize-cli db:migrate:undo",
     "migrations:up": "npx sequelize-cli db:migrate"
@@ -14,19 +18,25 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@types/uuid": "^10.0.0",
+    "ajv": "^8.17.1",
     "body-parser": "^1.20.2",
     "express": "^4.19.2",
     "express-rate-limit": "^7.4.0",
+    "nodemon": "^3.1.4",
     "pg": "^8.12.0",
     "pg-hstore": "^2.3.4",
     "ramda": "^0.30.1",
     "sequelize": "^6.37.3",
-    "sequelize-typescript": "^2.1.6"
+    "sequelize-typescript": "^2.1.6",
+    "tsc-alias": "^1.8.10",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/ramda": "^0.30.1",
     "eslint": "^9.9.1",
+    "npm-run-all": "^4.1.5",
     "prettier": "^3.3.3",
     "sequelize-cli": "^6.6.2",
     "typescript": "^5.5.4"

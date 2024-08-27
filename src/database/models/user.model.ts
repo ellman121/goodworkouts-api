@@ -1,10 +1,9 @@
 import {
-  Model,
   InferAttributes,
   InferCreationAttributes,
   CreationOptional,
 } from "sequelize";
-import { Column, DataType, Table } from "sequelize-typescript";
+import {Model, Column, DataType, Table } from "sequelize-typescript";
 
 @Table({ tableName: "users" })
 export class User extends Model<
