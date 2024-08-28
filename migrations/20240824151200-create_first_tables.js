@@ -38,10 +38,18 @@ module.exports = {
       name: nonNullString,
       userId: { type: Sequelize.UUID, allowNull: false },
     });
+
+    queryInterface.createTable("routines", {
+      ...base,
+      name: nonNullString,
+      userId: { type: Sequelize.UUID, allowNull: false },
+      exercises: { type: Sequelize.ARRAY(Sequelize.UUID), allowNull: false },
+    });
   },
 
   async down(queryInterface, Sequelize) {
     queryInterface.dropTable("users");
     queryInterface.dropTable("exercises");
+    queryInterface.dropTable("routines");
   },
 };

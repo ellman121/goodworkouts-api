@@ -4,7 +4,7 @@ import { createSecretKey } from "crypto";
 import { Request, Response, NextFunction } from "express";
 
 import { sendError } from "src/utils/responses";
-import { User } from "src/database/models/user.model";
+import User from "src/database/models/user.model";
 
 declare global {
   // I generally like this rule, but you have to disable it

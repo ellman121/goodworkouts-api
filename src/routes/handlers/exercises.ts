@@ -1,12 +1,9 @@
-import Ajv from "ajv";
 import { validate } from "uuid";
-import { JTDDataType } from "ajv/dist/core";
 import { Request, Response } from "express";
 
 import { sendError, sendResponse } from "src/utils/responses";
-import { Exercise } from "src/database/models/exercise.model";
-
-const ajv = new Ajv();
+import { validateRequestBody } from "src/utils/validation";
+import Exercise from "src/database/models/exercise.model";
 
 export async function getExercises(req: Request, res: Response) {
   if (!req.user) {
@@ -23,12 +20,8 @@ export async function getExercises(req: Request, res: Response) {
   );
 }
 
-interface GetExerciseByIdParams {
-  id: string;
-}
-
 export async function getExerciseById(
-  req: Request<GetExerciseByIdParams>,
+  req: Request<{ id: string }>,
   res: Response
 ) {
   if (!req.user) {
@@ -50,7 +43,7 @@ export async function getExerciseById(
   return sendResponse(res, exercise.toJSON());
 }
 
-const createExerciseRequestBody = {
+const createExerciseRequestBodySchema = {
   type: "object",
   properties: {
     name: { type: "string" },
@@ -59,21 +52,28 @@ const createExerciseRequestBody = {
   additionalProperties: false,
 } as const;
 
-export async function createExercise(
-  req: Request<null, null, JTDDataType<typeof createExerciseRequestBody>>,
-  res: Response
-) {
+export async function createExercise(req: Request, res: Response) {
   if (!req.user) {
     return sendError(res, 401, "Unauthorized");
   }
 
-  const v = ajv.validate(createExerciseRequestBody, req.body);
-  if (!v) {
-    console.log(ajv.errors);
-    return sendError(res, 400, ajv.errorsText());
+  const v = await validateRequestBody(
+    createExerciseRequestBodySchema,
+    req.body
+  );
+  if (!v.body) {
+    return sendError(
+      res,
+      400,
+      "Invalid request body",
+      v.errors.map((e) => e.message)
+    );
   }
 
-  const user = await Exercise.create({ ...req.body, userId: req.user.id });
+  const user = await Exercise.create({
+    name: v.body.name,
+    userId: req.user.id,
+  });
 
   if (!user) {
     return sendError(res, 404, "User not found");

@@ -6,10 +6,11 @@ import {
 } from "sequelize";
 import { Model, Column, DataType, Table, HasMany } from "sequelize-typescript";
 
-import { Exercise } from "./exercise.model";
+import Exercise from "./exercise.model";
+import Routine from "./routine.model";
 
 @Table({ tableName: "users" })
-export class User extends Model<
+export default class User extends Model<
   InferAttributes<User>,
   InferCreationAttributes<User>
 > {
@@ -31,4 +32,7 @@ export class User extends Model<
 
   @HasMany(() => Exercise)
   declare exercises?: NonAttribute<Exercise[]>;
+
+  @HasMany(() => Routine)
+  declare routines?: NonAttribute<Routine[]>;
 }

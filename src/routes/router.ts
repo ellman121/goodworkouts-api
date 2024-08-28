@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { authenticateUser } from "./middleware/injectUser";
 
-import { getExercises } from "./handlers/exercises";
+import { createExercise, getExercises } from "./handlers/exercises";
 import { createUser, getUserById } from "./handlers/users";
 
 const router = Router();
@@ -18,5 +18,6 @@ router.post("/users", createUser);
 
 // Exercise routes
 router.get("/exercises", [authenticateUser], getExercises);
+router.post("/exercises", [authenticateUser], createExercise);
 
 export default router;

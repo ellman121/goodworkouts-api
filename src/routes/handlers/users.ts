@@ -3,7 +3,7 @@ import { validate } from "uuid";
 import { JTDDataType } from "ajv/dist/core";
 import { Request, Response } from "express";
 
-import { User } from "src/database/models/user.model";
+import User from "src/database/models/user.model";
 import { sendError, sendResponse } from "src/utils/responses";
 
 const ajv = new Ajv();

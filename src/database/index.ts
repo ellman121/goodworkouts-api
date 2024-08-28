@@ -8,11 +8,8 @@ const sequelize = new Sequelize({
   password: process.env.DB_PASS,
   port: parseInt(process.env.DB_PORT ?? "5432"),
   models: [__dirname + "/models/*"],
-  modelMatch: (filename, member) => {
-    return (
-      filename.substring(0, filename.indexOf(".model")) === member.toLowerCase()
-    );
-  },
+  modelMatch: (filename, member) =>
+    filename.substring(0, filename.indexOf(".model")) === member.toLowerCase(),
 });
 
 export async function initDatabase() {

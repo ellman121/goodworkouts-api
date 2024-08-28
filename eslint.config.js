@@ -15,6 +15,7 @@ const customConfig = {
   rules: {
     "no-unused-vars": ["error", ignoreUnusedUnderscoreRuleConfig],
     "@typescript-eslint/no-unused-vars": ["error", ignoreUnusedUnderscoreRuleConfig],
+    "arrow-body-style": ["error", "as-needed"],
   },
   languageOptions: {
     parserOptions: {

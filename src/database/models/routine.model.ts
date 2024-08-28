@@ -13,10 +13,10 @@ import {
 
 import User from "./user.model";
 
-@Table({ tableName: "exercises" })
-export default class Exercise extends Model<
-  InferAttributes<Exercise>,
-  InferCreationAttributes<Exercise>
+@Table({ tableName: "routines" })
+export default class Routine extends Model<
+  InferAttributes<Routine>,
+  InferCreationAttributes<Routine>
 > {
   @Column({
     type: DataType.UUID,
@@ -27,6 +27,9 @@ export default class Exercise extends Model<
 
   @Column({ type: DataType.STRING })
   declare name: string;
+
+  @Column({ type: DataType.UUID })
+  declare exercises: string[];
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID })
