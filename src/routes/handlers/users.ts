@@ -4,7 +4,6 @@ import { User } from "src/database/models/user.model";
 import { Request, Response } from "express";
 import { sendError, sendResponse } from "src/utils/responses";
 import { validate } from "uuid";
-import { Exercise } from "src/database/models/exercise.model";
 
 const ajv = new Ajv();
 
@@ -32,7 +31,6 @@ export async function getUserById(
   return sendResponse(res, user.toJSON());
 }
 
-type CreateUserRequestBody = JTDDataType<typeof createUserRequestBodySchema>;
 const createUserRequestBodySchema = {
   type: "object",
   properties: {
@@ -45,7 +43,7 @@ const createUserRequestBodySchema = {
 } as const;
 
 export async function createUser(
-  req: Request<null, null, CreateUserRequestBody>,
+  req: Request<null, null, JTDDataType<typeof createUserRequestBodySchema>>,
   res: Response
 ) {
   const v = ajv.validate(createUserRequestBodySchema, req.body);

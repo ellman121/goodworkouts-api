@@ -9,12 +9,14 @@ const sequelize = new Sequelize({
   port: parseInt(process.env.DB_PORT ?? "5432"),
   models: [__dirname + "/models/*"],
   modelMatch: (filename, member) => {
-    return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
+    return (
+      filename.substring(0, filename.indexOf(".model")) === member.toLowerCase()
+    );
   },
 });
 
-export async function initDatabase() {
-  sequelize.authenticate().then(() => {
+export function initDatabase() {
+  void sequelize.authenticate().then(() => {
     console.log("DB connection established");
   });
 }

@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import { initDatabase } from "./database";
-import express, { Router } from "express";
+import express from "express";
 import rateLimit from "express-rate-limit";
 import router from "./routes/router";
 

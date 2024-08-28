@@ -8,7 +8,6 @@ import {
   Column,
   DataType,
   Table,
-  BelongsTo,
   ForeignKey,
 } from "sequelize-typescript";
 import { User } from "./user.model";
@@ -24,6 +23,9 @@ export class Exercise extends Model<
     defaultValue: DataType.UUIDV4,
   })
   declare id: CreationOptional<string>;
+
+  @Column({ type: DataType.STRING })
+  declare name: string;
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID })

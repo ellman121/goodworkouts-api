@@ -1,7 +1,7 @@
 import { Response } from "express";
 
 export function sendResponse<T>(res: Response, data?: T, code: number = 200) {
-  res.status(code)
+  res.status(code);
   if (!data) {
     return res.json({
       status: "success",
@@ -22,7 +22,12 @@ const defaultErrorMessages = {
   500: "Internal Server Error", // Something's gone wrong on the backend
 };
 
-export function sendError<T>(res: Response, code: keyof typeof defaultErrorMessages, message?: string, data?: T) {
+export function sendError<T>(
+  res: Response,
+  code: keyof typeof defaultErrorMessages,
+  message?: string,
+  data?: T
+) {
   return res.status(code).json({
     status: "error",
     message: message || defaultErrorMessages[code], // default error messages for each status code. You can pass in a more specific one, if you like.
