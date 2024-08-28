@@ -16,7 +16,6 @@ const sequelize = new Sequelize({
 });
 
 export async function initDatabase() {
-  await sequelize.authenticate().then(() => {
-    console.log("DB connection established");
-  });
+  await sequelize.authenticate();
+  console.log("DB connection established");
 }
