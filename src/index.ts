@@ -4,7 +4,8 @@ import express, { Router } from "express";
 import rateLimit from "express-rate-limit";
 import router from "./routes/router";
 
-console.log("Starting server...");
+const timeLabel = "Startup time";
+console.time(timeLabel);
 
 // Initialize the database
 initDatabase();
@@ -34,5 +35,6 @@ app.use((req, res, next) => {
 
 const port = process.env.PORT || 2000;
 app.listen(port, () => {
+  console.timeEnd(timeLabel);
   console.log(`Server is running on port ${port}`);
 });
