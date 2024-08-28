@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { createUser, getUserById } from "./handlers/users";
-import { getExercises } from "./handlers/exercises";
+
 import { authenticateUser } from "./middleware/injectUser";
+
+import { getExercises } from "./handlers/exercises";
+import { createUser, getUserById } from "./handlers/users";
 
 const router = Router();
 

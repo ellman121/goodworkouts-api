@@ -10,6 +10,7 @@ import {
   Table,
   ForeignKey,
 } from "sequelize-typescript";
+
 import { User } from "./user.model";
 
 @Table({ tableName: "exercises" })

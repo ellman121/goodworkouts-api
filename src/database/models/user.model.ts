@@ -4,7 +4,8 @@ import {
   CreationOptional,
   NonAttribute,
 } from "sequelize";
-import {Model, Column, DataType, Table, HasMany } from "sequelize-typescript";
+import { Model, Column, DataType, Table, HasMany } from "sequelize-typescript";
+
 import { Exercise } from "./exercise.model";
 
 @Table({ tableName: "users" })

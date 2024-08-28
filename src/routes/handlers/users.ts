@@ -1,9 +1,10 @@
 import Ajv from "ajv";
-import { JTDDataType } from "ajv/dist/core";
-import { User } from "src/database/models/user.model";
-import { Request, Response } from "express";
-import { sendError, sendResponse } from "src/utils/responses";
 import { validate } from "uuid";
+import { JTDDataType } from "ajv/dist/core";
+import { Request, Response } from "express";
+
+import { User } from "src/database/models/user.model";
+import { sendError, sendResponse } from "src/utils/responses";
 
 const ajv = new Ajv();
 

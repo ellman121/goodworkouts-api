@@ -1,8 +1,9 @@
-import bodyParser from "body-parser";
-import { initDatabase } from "./database";
 import express from "express";
+import bodyParser from "body-parser";
 import rateLimit from "express-rate-limit";
+
 import router from "./routes/router";
+import { initDatabase } from "./database";
 
 const timeLabel = "Startup time";
 console.time(timeLabel);
