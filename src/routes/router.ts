@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createUser, getUserById } from "./handlers/users";
 import { getExercises } from "./handlers/exercises";
-import { injectUser } from "./middleware/injectUser";
+import { authenticateUser } from "./middleware/injectUser";
 
 const router = Router();
 
@@ -15,6 +15,6 @@ router.get("/users/:id", getUserById);
 router.post("/users", createUser);
 
 // Exercise routes
-router.get("/exercises", [injectUser], getExercises);
+router.get("/exercises", [authenticateUser], getExercises);
 
 export default router;

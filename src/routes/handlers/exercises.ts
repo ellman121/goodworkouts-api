@@ -13,7 +13,7 @@ export async function getExercises(req: Request, res: Response) {
   }
 
   const exercises = await Exercise.findAll({
-    where: { userId: req.params.id },
+    where: { userId: req.user.id },
   });
 
   return sendResponse(
