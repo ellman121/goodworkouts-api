@@ -9,7 +9,7 @@ const timeLabel = "Startup time";
 console.time(timeLabel);
 
 // Initialize the database
-initDatabase();
+const initializers = Promise.all([initDatabase()]);
 
 // Create the express app and listen
 const app = express();
@@ -18,7 +18,7 @@ const app = express();
 app.disable("x-powered-by");
 
 // set up file, url and rate limits
-app.use(bodyParser.json({ limit: "35mb" }));
+app.use(bodyParser.json({ limit: "1mb" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
   rateLimit({
@@ -35,7 +35,9 @@ app.use((req, res, next) => {
 });
 
 const port = process.env.PORT || 2000;
-app.listen(port, () => {
-  console.timeEnd(timeLabel);
-  console.log(`Server is running on port ${port}`);
+void initializers.then(() => {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+    console.timeEnd(timeLabel);
+  });
 });

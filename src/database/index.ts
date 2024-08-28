@@ -15,8 +15,8 @@ const sequelize = new Sequelize({
   },
 });
 
-export function initDatabase() {
-  void sequelize.authenticate().then(() => {
+export async function initDatabase() {
+  await sequelize.authenticate().then(() => {
     console.log("DB connection established");
   });
 }
