@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { userAuth } from "./middleware/injectUser";
-import { validateUUIDs } from "./middleware/validateUUIDs";
+import { validateIdParams } from "./middleware/validateUUIDs";
 
 import { createUser, getLoggedInUserInfo, updateUser } from "./handlers/users";
 import {
@@ -36,25 +36,13 @@ router.put("/users", [userAuth], updateUser);
 const exercisesById = "/exercises/:exerciseId";
 router.get("/exercises", [userAuth], getExercises);
 router.post("/exercises", [userAuth], createExercise);
-router.delete(`${exercisesById}`, [userAuth, validateUUIDs], deleteExercise);
+router.delete(`${exercisesById}`, [userAuth, validateIdParams], deleteExercise);
 
 // Exercise Set Routes
 const setsById = "/sets/:setId";
-router.get(`${exercisesById}/sets`, [userAuth, validateUUIDs], getExerciseSets);
-router.post(
-  `${exercisesById}/sets`,
-  [userAuth, validateUUIDs],
-  createExerciseSet
-);
-router.put(
-  `${exercisesById}${setsById}`,
-  [userAuth, validateUUIDs],
-  updateExerciseSet
-);
-router.delete(
-  `${exercisesById}${setsById}`,
-  [userAuth, validateUUIDs],
-  deleteExerciseSet
-);
+router.get(`${exercisesById}/sets`, [userAuth, validateIdParams], getExerciseSets);
+router.post(`${exercisesById}/sets`, [userAuth, validateIdParams], createExerciseSet);
+router.put(`${exercisesById}${setsById}`, [userAuth, validateIdParams], updateExerciseSet);
+router.delete(`${exercisesById}${setsById}`, [userAuth, validateIdParams], deleteExerciseSet);
 
 export default router;

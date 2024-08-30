@@ -6,7 +6,7 @@ import { sendError } from "src/utils/responses";
 const isIdParam = R.endsWith("Id");
 const isUUID = (value: string) => validate(value);
 
-export function validateUUIDs(
+export function validateIdParams(
   req: Request,
   res: Response,
   next: NextFunction
