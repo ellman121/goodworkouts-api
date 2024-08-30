@@ -9,12 +9,15 @@ const ignoreUnusedUnderscoreRuleConfig = {
   varsIgnorePattern: "^_",
 };
 
-const customConfig = {
+const base = {
   name: "customConfig",
   files: ["src/**/*.ts"],
   rules: {
     "no-unused-vars": ["error", ignoreUnusedUnderscoreRuleConfig],
-    "@typescript-eslint/no-unused-vars": ["error", ignoreUnusedUnderscoreRuleConfig],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      ignoreUnusedUnderscoreRuleConfig,
+    ],
     "arrow-body-style": ["error", "as-needed"],
   },
   languageOptions: {
@@ -25,10 +28,18 @@ const customConfig = {
   },
 };
 
-// Top overrides bottom
+const hardOverrides = {
+  name: "hardOverrides",
+  rules: {
+    curly: ["error", "multi-or-nest", "consistent"],
+  },
+};
+
+// Bottom overrides top
 module.exports = [
-  customConfig,
+  base,
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   eslintConfigPrettier,
+  hardOverrides,
 ];

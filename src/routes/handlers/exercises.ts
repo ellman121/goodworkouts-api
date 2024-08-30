@@ -1,15 +1,13 @@
-import { validate } from "uuid";
 import { Request, Response } from "express";
 
-import { sendError, sendResponse } from "src/utils/responses";
-import { validateRequestBody } from "src/utils/validation";
 import Exercise from "src/database/models/exercise.model";
+import ExerciseSet from "src/database/models/exerciseSet.model";
+import { validateRequestBody } from "src/utils/validation";
+import { sendError, sendResponse } from "src/utils/responses";
+
+import { exerciseBodySchema } from "./schemas";
 
 export async function getExercises(req: Request, res: Response) {
-  if (!req.user) {
-    return sendError(res, 401, "Unauthorized");
-  }
-
   const exercises = await Exercise.findAll({
     where: { userId: req.user.id },
   });
@@ -24,60 +22,60 @@ export async function getExerciseById(
   req: Request<{ id: string }>,
   res: Response
 ) {
-  if (!req.user) {
-    return sendError(res, 401, "Unauthorized");
-  }
-
-  if (!validate(req.params.id)) {
-    return sendError(res, 400, "Invalid user ID");
-  }
-
   const exercise = await Exercise.findOne({
     where: { id: req.params.id },
   });
 
-  if (!exercise) {
-    return sendError(res, 404, "Exercise not found");
-  }
+  if (!exercise) return sendError(res, 404, "Exercise not found");
 
   return sendResponse(res, exercise.toJSON());
 }
 
-const createExerciseRequestBodySchema = {
-  type: "object",
-  properties: {
-    name: { type: "string" },
-  },
-  required: ["name"],
-  additionalProperties: false,
-} as const;
-
 export async function createExercise(req: Request, res: Response) {
-  if (!req.user) {
-    return sendError(res, 401, "Unauthorized");
-  }
-
-  const v = await validateRequestBody(
-    createExerciseRequestBodySchema,
-    req.body
-  );
-  if (!v.body) {
-    return sendError(
-      res,
-      400,
-      "Invalid request body",
-      v.errors.map((e) => e.message)
-    );
-  }
+  const v = await validateRequestBody(exerciseBodySchema, req.body);
+  if (!v.body)
+    return sendError(res, 400, "Invalid request body", v.errorMessages);
 
   const user = await Exercise.create({
     name: v.body.name,
     userId: req.user.id,
   });
 
-  if (!user) {
-    return sendError(res, 404, "User not found");
-  }
+  if (!user) return sendError(res, 404, "User not found");
 
   return sendResponse(res, user.toJSON());
+}
+
+export async function updateExercise(req: Request, res: Response) {
+  const v = await validateRequestBody(exerciseBodySchema, req.body);
+  if (!v.body)
+    return sendError(res, 400, "Invalid request body", v.errorMessages);
+
+  const user = await Exercise.create({
+    name: v.body.name,
+    userId: req.user.id,
+  });
+
+  if (!user) return sendError(res, 404, "User not found");
+
+  return sendResponse(res, user.toJSON());
+}
+
+export async function deleteExercise(
+  req: Request<{ exerciseId: string }>,
+  res: Response
+) {
+  const e = await Exercise.findOne({
+    where: { id: req.params.exerciseId },
+  });
+
+  if (!e) return sendError(res, 404, "Set not found");
+
+  // Delete associated sets and the exercise itself
+  await Promise.all([
+    await ExerciseSet.destroy({ where: { exerciseId: req.params.exerciseId } }),
+    await e.destroy(),
+  ]);
+
+  return sendResponse(res);
 }

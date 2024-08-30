@@ -30,9 +30,7 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  router(req, res, next);
-});
+app.use(router);
 
 const port = process.env.PORT || 2000;
 void initializers.then(() => {

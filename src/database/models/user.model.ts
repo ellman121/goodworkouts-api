@@ -4,7 +4,7 @@ import {
   CreationOptional,
   NonAttribute,
 } from "sequelize";
-import { Model, Column, DataType, Table, HasMany } from "sequelize-typescript";
+import { Model, Column, DataType, Table, HasMany, DeletedAt } from "sequelize-typescript";
 
 import Exercise from "./exercise.model";
 import Routine from "./routine.model";
@@ -29,6 +29,9 @@ export default class User extends Model<
 
   @Column({ type: DataType.STRING })
   declare password: string;
+
+  @DeletedAt
+  declare deletedAt?: Date | null;
 
   @HasMany(() => Exercise)
   declare exercises?: NonAttribute<Exercise[]>;

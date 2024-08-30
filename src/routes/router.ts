@@ -1,9 +1,20 @@
 import { Router } from "express";
 
-import { authenticateUser } from "./middleware/injectUser";
+import { userAuth } from "./middleware/injectUser";
+import { validateUUIDs } from "./middleware/validateUUIDs";
 
-import { createExercise, getExercises } from "./handlers/exercises";
-import { createUser, getUserById } from "./handlers/users";
+import { createUser, getLoggedInUserInfo, updateUser } from "./handlers/users";
+import {
+  createExerciseSet,
+  deleteExerciseSet,
+  getExerciseSets,
+  updateExerciseSet,
+} from "./handlers/exerciseSets";
+import {
+  createExercise,
+  getExercises,
+  deleteExercise,
+} from "./handlers/exercises";
 
 const router = Router();
 
@@ -12,12 +23,38 @@ const router = Router();
 // is just router.method() calls, I just disable the rule here
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
+router.get("/", (_, res) => {
+  res.send("Hello, world!");
+});
+
 // User routes
-router.get("/users/:id", getUserById);
-router.post("/users", createUser);
+router.get("/users", [userAuth], getLoggedInUserInfo);
+router.post("/users", [], createUser); // No auth when creating a user
+router.put("/users", [userAuth], updateUser);
 
 // Exercise routes
-router.get("/exercises", [authenticateUser], getExercises);
-router.post("/exercises", [authenticateUser], createExercise);
+const exercisesById = "/exercises/:exerciseId";
+router.get("/exercises", [userAuth], getExercises);
+router.post("/exercises", [userAuth], createExercise);
+router.delete(`${exercisesById}`, [userAuth, validateUUIDs], deleteExercise);
+
+// Exercise Set Routes
+const setsById = "/sets/:setId";
+router.get(`${exercisesById}/sets`, [userAuth, validateUUIDs], getExerciseSets);
+router.post(
+  `${exercisesById}/sets`,
+  [userAuth, validateUUIDs],
+  createExerciseSet
+);
+router.put(
+  `${exercisesById}${setsById}`,
+  [userAuth, validateUUIDs],
+  updateExerciseSet
+);
+router.delete(
+  `${exercisesById}${setsById}`,
+  [userAuth, validateUUIDs],
+  deleteExerciseSet
+);
 
 export default router;

@@ -1,7 +1,7 @@
 "use strict";
 
 const exampleUser = {
-  id: "12345678-1234-1234-1234-123456789abc",
+  id: "6c677a30-e584-43df-a552-b47a7a95a0b4",
   email: "example@test.com",
   username: "exampleUser",
   password: "fakePassword",
@@ -28,6 +28,7 @@ module.exports = {
         email: nonNullString,
         username: nonNullString,
         password: nonNullString,
+        deletedAt: { type: Sequelize.DATE, allowNull: true },
       })
       .then(() => {
         queryInterface.insert(null, "users", exampleUser);
@@ -45,11 +46,25 @@ module.exports = {
       userId: { type: Sequelize.UUID, allowNull: false },
       exercises: { type: Sequelize.ARRAY(Sequelize.UUID), allowNull: false },
     });
+
+    queryInterface.createTable(
+      "sets",
+      {
+        ...base,
+        exerciseId: { type: Sequelize.UUID, allowNull: false },
+        reps: {
+          type: Sequelize.ARRAY(Sequelize.ARRAY(Sequelize.NUMBER)),
+          allowNull: false,
+        },
+      },
+      { logging: console.log }
+    );
   },
 
   async down(queryInterface, Sequelize) {
     queryInterface.dropTable("users");
     queryInterface.dropTable("exercises");
     queryInterface.dropTable("routines");
+    queryInterface.dropTable("sets");
   },
 };

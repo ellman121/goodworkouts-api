@@ -1,63 +1,56 @@
-import Ajv from "ajv";
-import { validate } from "uuid";
-import { JTDDataType } from "ajv/dist/core";
 import { Request, Response } from "express";
 
 import User from "src/database/models/user.model";
 import { sendError, sendResponse } from "src/utils/responses";
+import { validateRequestBody } from "src/utils/validation";
+import { createUserBodySchema, updateUserBodySchema } from "./schemas";
 
-const ajv = new Ajv();
-
-interface GetUserByIdParams {
-  id: string;
-}
-
-export async function getUserById(
-  req: Request<GetUserByIdParams>,
-  res: Response
-) {
-  if (!validate(req.params.id)) {
-    return sendError(res, 400, "Invalid user ID");
-  }
-
+export async function getLoggedInUserInfo(req: Request, res: Response) {
   const user = await User.findOne({
-    where: { id: req.params.id },
+    where: { id: req.user.id },
     attributes: { exclude: ["password", "email"] },
   });
 
-  if (!user) {
-    return sendError(res, 404, "User not found");
-  }
+  if (!user) return sendError(res, 404, "User not found");
 
   return sendResponse(res, user.toJSON());
 }
 
-const createUserRequestBodySchema = {
-  type: "object",
-  properties: {
-    username: { type: "string" },
-    email: { type: "string" },
-    password: { type: "string" },
-  },
-  required: ["username", "email", "password"],
-  additionalProperties: false,
-} as const;
+export async function createUser(req: Request, res: Response) {
+  const v = await validateRequestBody(createUserBodySchema, req.body);
+  if (!v.body)
+    return sendError(res, 400, "Invalid request body", v.errorMessages);
 
-export async function createUser(
-  req: Request<null, null, JTDDataType<typeof createUserRequestBodySchema>>,
-  res: Response
-) {
-  const v = ajv.validate(createUserRequestBodySchema, req.body);
-  if (!v) {
-    console.log(ajv.errors);
-    return sendError(res, 400, ajv.errorsText());
-  }
+  const user = await User.create(v.body);
 
-  const user = await User.create(req.body);
-
-  if (!user) {
-    return sendError(res, 404, "User not found");
-  }
+  if (!user) return sendError(res, 404, "User not found");
 
   return sendResponse(res, user.toJSON());
+}
+
+export async function updateUser(req: Request, res: Response) {
+  const v = await validateRequestBody(updateUserBodySchema, req.body);
+  if (!v.body)
+    return sendError(res, 400, "Invalid request body", v.errorMessages);
+
+  const [user] = await User.upsert({
+    ...v.body,
+    id: req.user.id,
+  });
+
+  if (!user) return sendError(res, 404, "User not found");
+
+  return sendResponse(res, user.toJSON());
+}
+
+export async function deleteUser(req: Request, res: Response) {
+  const user = await User.findOne({
+    where: { id: req.user.id },
+  });
+
+  if (!user) return sendError(res, 404, "User not found");
+
+  await user.destroy();
+
+  return sendResponse(res, { message: `User '${user.id}' deleted` });
 }
