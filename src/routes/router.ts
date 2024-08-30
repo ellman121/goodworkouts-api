@@ -3,7 +3,8 @@ import { Router } from "express";
 import { userAuth } from "./middleware/injectUser";
 import { validateIdParams } from "./middleware/validateUUIDs";
 
-import { createUser, getLoggedInUserInfo, updateUser } from "./handlers/users";
+import { login } from "./handlers/authentication";
+import { createUser, deleteUser, getLoggedInUserInfo, updateUser } from "./handlers/users";
 import {
   createExerciseSet,
   deleteExerciseSet,
@@ -27,10 +28,14 @@ router.get("/", (_, res) => {
   res.send("Hello, world!");
 });
 
+// Authentication Routes
+router.post("/login", [], login);
+
 // User routes
 router.get("/users", [userAuth], getLoggedInUserInfo);
-router.post("/users", [], createUser); // No auth when creating a user
+router.post("/users", [], createUser);
 router.put("/users", [userAuth], updateUser);
+router.delete("/users", [userAuth], deleteUser);
 
 // Exercise routes
 const exercisesById = "/exercises/:exerciseId";

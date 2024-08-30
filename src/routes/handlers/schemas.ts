@@ -1,3 +1,13 @@
+export const loginBodySchema = {
+  type: "object",
+  properties: {
+    username: { type: "string" },
+    password: { type: "string" },
+  },
+  required: ["username", "password"],
+  additionalProperties: false,
+} as const;
+
 export const updateUserBodySchema = {
   type: "object",
   properties: {

@@ -1,10 +1,9 @@
-import { jwtVerify } from "jose";
 import { Attributes } from "sequelize";
-import { createSecretKey } from "crypto";
 import { Request, Response, NextFunction } from "express";
 
 import { sendError } from "src/utils/responses";
 import User from "src/database/models/user.model";
+import { validateJWT } from "src/utils/jtw";
 
 declare global {
   // I generally like this rule, but you have to disable it
@@ -16,9 +15,6 @@ declare global {
     }
   }
 }
-
-const key = createSecretKey(Buffer.from("super_sercret"));
-const TOKEN_EXPIRATION_TIME_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 export async function userAuth(
   req: Request,
@@ -32,18 +28,14 @@ export async function userAuth(
       if (!authHeader || !authHeader.startsWith("Bearer "))
         return sendError(res, 401, "Unauthorized");
 
-      const token = await jwtVerify<Goodworkouts.JWTPayload>(
-        authHeader.split(" ")[1],
-        key
-      );
-
-      // If the token is too old, return 400
-      if (Date.now() >= TOKEN_EXPIRATION_TIME_MS + (token.payload.iat ?? 0))
-        return sendError(res, 400, "Token expired");
+      const jwt = await validateJWT(authHeader.split(" ")[1]);
+      
+      if (!jwt.valid || !jwt.payload)
+        return sendError(res, 401, "Unauthorized");
 
       // Fetch the user from the database using the userId
       const user = await User.findOne({
-        where: { id: token.payload.userId },
+        where: { id: jwt.payload.userId },
       });
 
       if (!user) return sendError(res, 404, "User not found");
