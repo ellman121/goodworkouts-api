@@ -17,6 +17,12 @@ const app = express();
 // Remove X-Powered-By header for security reason
 app.disable("x-powered-by");
 
+// Always force json
+app.use((req, _, next) => {
+  req.headers["content-type"] = "application/json";
+  next();
+});
+
 // set up file, url and rate limits
 app.use(bodyParser.json({ limit: "1mb" }));
 app.use(bodyParser.urlencoded({ extended: false }));

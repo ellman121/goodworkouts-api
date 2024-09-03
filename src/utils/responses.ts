@@ -7,10 +7,7 @@ export function sendResponse<T>(res: Response, data?: T, code: number = 200) {
       status: "success",
     });
   }
-  return res.json({
-    status: "success",
-    data,
-  });
+  return res.json(data);
 }
 
 const defaultErrorMessages = {
