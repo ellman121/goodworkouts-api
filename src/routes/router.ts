@@ -3,7 +3,7 @@ import { Router } from "express";
 import { userAuth } from "./middleware/injectUser";
 import { validateIdParams } from "./middleware/validateUUIDs";
 
-import { login } from "./handlers/authentication";
+import { login, reauthenticate } from "./handlers/authentication";
 import { createUser, deleteUser, getLoggedInUserInfo, updateUser } from "./handlers/users";
 import {
   createExerciseSet,
@@ -30,6 +30,7 @@ router.get("/", (_, res) => {
 
 // Authentication Routes
 router.post("/login", [], login);
+router.post("/reauthenticate", [], reauthenticate);
 
 // User routes
 router.get("/users", [userAuth], getLoggedInUserInfo);

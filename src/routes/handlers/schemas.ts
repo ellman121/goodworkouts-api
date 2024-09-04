@@ -8,6 +8,15 @@ export const loginBodySchema = {
   additionalProperties: false,
 } as const;
 
+export const reauthenticateBodySchema = {
+  type: "object",
+  properties: {
+    refreshToken: { type: "string" },
+  },
+  required: ["refreshToken"],
+  additionalProperties: false,
+} as const;
+
 export const updateUserBodySchema = {
   type: "object",
   properties: {

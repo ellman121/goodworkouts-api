@@ -6,9 +6,9 @@ interface JWTPayload {
 }
 
 const secretKey = createSecretKey(Buffer.from("super_sercret"));
-const expireTime = "20s";
 
-export async function generateJWT(p: JWTPayload) {
+// Expire times are either 3h or 7d in seconds
+export async function generateJWT(p: JWTPayload, expireTime: "10800s" | "604800s") {
   const token = await new SignJWT({
     ...p,
   })

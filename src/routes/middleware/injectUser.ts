@@ -43,6 +43,7 @@ export async function userAuth(
       // Add the user to the request object
       req.user = user.toJSON();
     } else if (req.app.get("env") === "development") {
+      console.log("Injecting dev user");
       const devUser = await User.findOne({
         where: { id: "6c677a30-e584-43df-a552-b47a7a95a0b4" },
       });
