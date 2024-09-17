@@ -8,13 +8,13 @@ import { sendError, sendResponse } from "src/utils/responses";
 import { exerciseBodySchema } from "./schemas";
 
 export async function getExercises(req: Request, res: Response) {
-  const exercises = await Exercise.findAll({
+  const es = await Exercise.findAll({
     where: { userId: req.user.id },
   });
 
   return sendResponse(
     res,
-    exercises.map((e) => e.toJSON())
+    es.map((e) => e.toJSON())
   );
 }
 
@@ -36,14 +36,14 @@ export async function createExercise(req: Request, res: Response) {
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
-  const user = await Exercise.create({
+  const e = await Exercise.create({
     name: v.body.name,
     userId: req.user.id,
   });
 
-  if (!user) return sendError(res, 404, "User not found");
+  if (!e) return sendError(res, 404, "User not found");
 
-  return sendResponse(res, user.toJSON());
+  return sendResponse(res, e.toJSON());
 }
 
 export async function updateExercise(req: Request, res: Response) {
@@ -51,14 +51,14 @@ export async function updateExercise(req: Request, res: Response) {
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
-  const user = await Exercise.create({
+  const exercise = await Exercise.create({
     name: v.body.name,
     userId: req.user.id,
   });
 
-  if (!user) return sendError(res, 404, "User not found");
+  if (!exercise) return sendError(res, 404, "User not found");
 
-  return sendResponse(res, user.toJSON());
+  return sendResponse(res, exercise.toJSON());
 }
 
 export async function deleteExercise(
@@ -75,6 +75,7 @@ export async function deleteExercise(
   await Promise.all([
     await ExerciseSet.destroy({ where: { exerciseId: req.params.exerciseId } }),
     await e.destroy(),
+    // TODO: Delete routines that contain this exercise
   ]);
 
   return sendResponse(res);
