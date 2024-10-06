@@ -13,7 +13,7 @@ export async function getExerciseSets(
 ) {
   const e = await Exercise.findOne({
     attributes: ["id", "name"],
-    where: { id: req.params.exerciseId },
+    where: { id: req.params.exerciseId, userId: req.user.id },
   });
 
   if (!e) return sendError(res, 404, "Exercise not found");
@@ -21,7 +21,7 @@ export async function getExerciseSets(
   const sets = await ExerciseSet.findAll({
     attributes: ["reps", "createdAt"],
     where: { exerciseId: e.id },
-    order: [["createdAt", "DESC"]],
+    order: [["updatedAt", "DESC"]],
   });
 
   return sendResponse(res, {
@@ -39,7 +39,7 @@ export async function createExerciseSet(
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
   const exercise = await Exercise.findOne({
-    where: { id: req.params.exerciseId },
+    where: { id: req.params.exerciseId, userId: req.user.id },
   });
 
   if (!exercise) return sendError(res, 404, "Exercise not found");
@@ -61,14 +61,19 @@ export async function updateExerciseSet(
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
   const exercise = await Exercise.findOne({
-    where: { id: req.params.exerciseId },
+    where: { id: req.params.exerciseId, userId: req.user.id },
   });
 
   if (!exercise) return sendError(res, 404, "Exercise not found");
 
-  const set = await ExerciseSet.create({
-    exerciseId: exercise.id,
-    reps: v.body.reps as [number, number][],
+  const set = await ExerciseSet.findOne({
+    where: { id: exercise.id },
+  });
+
+  if (!set) return sendError(res, 404, "Set not found");
+
+  await set.update({
+    reps: v.body.reps as Array<[number, number]>,
   });
 
   return sendResponse(res, set.toJSON());
@@ -78,11 +83,17 @@ export async function deleteExerciseSet(
   req: Request<{ exerciseId: string; setId: string }>,
   res: Response
 ) {
-  const s = await ExerciseSet.findOne({
-    where: { id: req.params.setId, exerciseId: req.params.exerciseId },
-  });
+  // Check that the user also owns this exercise
+  const [e, s] = await Promise.all([
+    Exercise.findOne({
+      where: { id: req.params.exerciseId, userId: req.user.id },
+    }),
+    ExerciseSet.findOne({
+      where: { id: req.params.setId, exerciseId: req.params.exerciseId },
+    }),
+  ]);
 
-  if (!s) return sendError(res, 404, "Set not found");
+  if (!e || !s) return sendError(res, 404, "Set not found");
 
   await s.destroy();
 

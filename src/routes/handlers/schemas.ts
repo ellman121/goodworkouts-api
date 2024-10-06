@@ -57,3 +57,16 @@ export const setBodySchema = {
   required: ["reps"],
   additionalProperties: false,
 } as const;
+
+export const routineBodySchema = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    exercises: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+  required: ["name", "exercises"],
+  additionalProperties: false,
+} as const;

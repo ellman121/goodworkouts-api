@@ -44,21 +44,21 @@ module.exports = {
       ...base,
       name: nonNullString,
       userId: { type: Sequelize.UUID, allowNull: false },
-      exercises: { type: Sequelize.ARRAY(Sequelize.UUID), allowNull: false },
+      exercises: {
+        type: Sequelize.ARRAY(Sequelize.UUID),
+        allowNull: false,
+        defaultValue: [],
+      },
     });
 
-    queryInterface.createTable(
-      "sets",
-      {
-        ...base,
-        exerciseId: { type: Sequelize.UUID, allowNull: false },
-        reps: {
-          type: Sequelize.ARRAY(Sequelize.ARRAY(Sequelize.NUMBER)),
-          allowNull: false,
-        },
+    queryInterface.createTable("sets", {
+      ...base,
+      exerciseId: { type: Sequelize.UUID, allowNull: false },
+      reps: {
+        type: Sequelize.ARRAY(Sequelize.ARRAY(Sequelize.NUMBER)),
+        allowNull: false,
       },
-      { logging: console.log }
-    );
+    });
   },
 
   async down(queryInterface, Sequelize) {
