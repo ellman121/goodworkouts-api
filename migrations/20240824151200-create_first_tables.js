@@ -22,7 +22,7 @@ module.exports = {
 
     const nonNullString = { type: Sequelize.STRING, allowNull: false };
 
-    queryInterface
+    await queryInterface
       .createTable("users", {
         ...base,
         email: nonNullString,
@@ -34,13 +34,13 @@ module.exports = {
         queryInterface.insert(null, "users", exampleUser);
       });
 
-    queryInterface.createTable("exercises", {
+    await queryInterface.createTable("exercises", {
       ...base,
       name: nonNullString,
       userId: { type: Sequelize.UUID, allowNull: false },
     });
 
-    queryInterface.createTable("routines", {
+    await queryInterface.createTable("routines", {
       ...base,
       name: nonNullString,
       userId: { type: Sequelize.UUID, allowNull: false },
@@ -51,14 +51,15 @@ module.exports = {
       },
     });
 
-    queryInterface.createTable("sets", {
+    await queryInterface.createTable("sets", {
       ...base,
       exerciseId: { type: Sequelize.UUID, allowNull: false },
-      reps: {
-        type: Sequelize.ARRAY(Sequelize.ARRAY(Sequelize.NUMBER)),
-        allowNull: false,
-      },
     });
+
+    await queryInterface.sequelize.query(`
+      ALTER TABLE "sets"
+      ADD COLUMN "reps" NUMERIC[][2] NOT NULL DEFAULT '{{0,0}}'::numeric[][2];
+      `);
   },
 
   async down(queryInterface, Sequelize) {
