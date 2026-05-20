@@ -19,7 +19,7 @@ export async function getExerciseSets(
   if (!e) return sendError(res, 404, "Exercise not found");
 
   const sets = await ExerciseSet.findAll({
-    attributes: ["reps", "createdAt"],
+    attributes: ["id", "reps", "createdAt"],
     where: { exerciseId: e.id },
     order: [["updatedAt", "DESC"]],
   });
@@ -53,7 +53,7 @@ export async function createExerciseSet(
 }
 
 export async function updateExerciseSet(
-  req: Request<{ exerciseId: string }>,
+  req: Request<{ exerciseId: string; setId: string }>,
   res: Response
 ) {
   const v = await validateRequestBody(setBodySchema, req.body);
@@ -67,7 +67,7 @@ export async function updateExerciseSet(
   if (!exercise) return sendError(res, 404, "Exercise not found");
 
   const set = await ExerciseSet.findOne({
-    where: { id: exercise.id },
+    where: { id: req.params.setId, exerciseId: req.params.exerciseId },
   });
 
   if (!set) return sendError(res, 404, "Set not found");
@@ -83,7 +83,6 @@ export async function deleteExerciseSet(
   req: Request<{ exerciseId: string; setId: string }>,
   res: Response
 ) {
-  // Check that the user also owns this exercise
   const [e, s] = await Promise.all([
     Exercise.findOne({
       where: { id: req.params.exerciseId, userId: req.user.id },

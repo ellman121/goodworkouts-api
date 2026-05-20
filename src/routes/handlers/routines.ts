@@ -10,27 +10,27 @@ import Exercise from "src/database/models/exercise.model";
 import { Op } from "sequelize";
 
 export async function getRoutines(req: Request, res: Response) {
-  const es = await Routine.findAll({
+  const routines = await Routine.findAll({
     where: { userId: req.user.id },
   });
 
   return sendResponse(
     res,
-    es.map((e) => e.toJSON())
+    routines.map((r) => r.toJSON())
   );
 }
 
 export async function getRoutineById(
-  req: Request<{ id: string }>,
+  req: Request<{ routineId: string }>,
   res: Response
 ) {
-  const exercise = await Routine.findOne({
-    where: { id: req.params.id, userId: req.user.id },
+  const routine = await Routine.findOne({
+    where: { id: req.params.routineId, userId: req.user.id },
   });
 
-  if (!exercise) return sendError(res, 404, "Exercise not found");
+  if (!routine) return sendError(res, 404, "Routine not found");
 
-  return sendResponse(res, exercise.toJSON());
+  return sendResponse(res, routine.toJSON());
 }
 
 async function allExercisesAreValid(exercises: string[], userId: string) {
@@ -63,12 +63,13 @@ export async function createRoutine(req: Request, res: Response) {
     exercises: v.body.exercises as string[],
   });
 
-  if (!r) return sendError(res, 404, "User not found");
-
   return sendResponse(res, r.toJSON());
 }
 
-export async function updateRoutine(req: Request, res: Response) {
+export async function updateRoutine(
+  req: Request<{ routineId: string }>,
+  res: Response
+) {
   const v = await validateRequestBody(routineBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
@@ -83,31 +84,31 @@ export async function updateRoutine(req: Request, res: Response) {
     );
   }
 
-  const exercise = await Routine.findOne({
+  const routine = await Routine.findOne({
     where: { id: req.params.routineId, userId: req.user.id },
   });
 
-  if (!exercise) return sendError(res, 404, "Exercise not found");
+  if (!routine) return sendError(res, 404, "Routine not found");
 
-  await exercise.update({
+  await routine.update({
     name: v.body.name,
     exercises: v.body.exercises as string[],
   });
 
-  return sendResponse(res, exercise.toJSON());
+  return sendResponse(res, routine.toJSON());
 }
 
 export async function deleteRoutine(
   req: Request<{ routineId: string }>,
   res: Response
 ) {
-  const r = await Routine.findOne({
+  const routine = await Routine.findOne({
     where: { id: req.params.routineId, userId: req.user.id },
   });
 
-  if (!r) return sendError(res, 404, "Set not found");
+  if (!routine) return sendError(res, 404, "Routine not found");
 
-  await r.destroy();
+  await routine.destroy();
 
   return sendResponse(res);
 }

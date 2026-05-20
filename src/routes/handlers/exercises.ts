@@ -19,11 +19,11 @@ export async function getExercises(req: Request, res: Response) {
 }
 
 export async function getExerciseById(
-  req: Request<{ id: string }>,
+  req: Request<{ exerciseId: string }>,
   res: Response
 ) {
   const exercise = await Exercise.findOne({
-    where: { id: req.params.id },
+    where: { id: req.params.exerciseId, userId: req.user.id },
   });
 
   if (!exercise) return sendError(res, 404, "Exercise not found");
@@ -41,22 +41,24 @@ export async function createExercise(req: Request, res: Response) {
     userId: req.user.id,
   });
 
-  if (!e) return sendError(res, 404, "User not found");
-
   return sendResponse(res, e.toJSON());
 }
 
-export async function updateExercise(req: Request, res: Response) {
+export async function updateExercise(
+  req: Request<{ exerciseId: string }>,
+  res: Response
+) {
   const v = await validateRequestBody(exerciseBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
-  const exercise = await Exercise.create({
-    name: v.body.name,
-    userId: req.user.id,
+  const exercise = await Exercise.findOne({
+    where: { id: req.params.exerciseId, userId: req.user.id },
   });
 
-  if (!exercise) return sendError(res, 404, "User not found");
+  if (!exercise) return sendError(res, 404, "Exercise not found");
+
+  await exercise.update({ name: v.body.name });
 
   return sendResponse(res, exercise.toJSON());
 }
@@ -66,16 +68,15 @@ export async function deleteExercise(
   res: Response
 ) {
   const e = await Exercise.findOne({
-    where: { id: req.params.exerciseId },
+    where: { id: req.params.exerciseId, userId: req.user.id },
   });
 
-  if (!e) return sendError(res, 404, "Set not found");
+  if (!e) return sendError(res, 404, "Exercise not found");
 
-  // Delete associated sets and the exercise itself
   await Promise.all([
-    await ExerciseSet.destroy({ where: { exerciseId: req.params.exerciseId } }),
-    await e.destroy(),
-    // TODO: Delete routines that contain this exercise
+    ExerciseSet.destroy({ where: { exerciseId: req.params.exerciseId } }),
+    e.destroy(),
+    // TODO: Remove this exercise from any routines that reference it
   ]);
 
   return sendResponse(res);

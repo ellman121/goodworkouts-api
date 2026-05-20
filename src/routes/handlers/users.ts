@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
 
 import User from "src/database/models/user.model";
 import { sendError, sendResponse } from "src/utils/responses";
@@ -21,11 +22,11 @@ export async function createUser(req: Request, res: Response) {
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
-  const user = await User.create(v.body);
+  const hashedPassword = await bcrypt.hash(v.body.password, 10);
+  const user = await User.create({ ...v.body, password: hashedPassword });
 
-  if (!user) return sendError(res, 404, "User not found");
-
-  return sendResponse(res, user.toJSON());
+  const { password: _, ...safeUser } = user.toJSON();
+  return sendResponse(res, safeUser);
 }
 
 export async function updateUser(req: Request, res: Response) {
@@ -33,14 +34,20 @@ export async function updateUser(req: Request, res: Response) {
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
+  const updates = { ...v.body };
+  if (updates.password) 
+    updates.password = await bcrypt.hash(updates.password, 10);
+  
+
   const [user] = await User.upsert({
-    ...v.body,
+    ...updates,
     id: req.user.id,
   });
 
   if (!user) return sendError(res, 404, "User not found");
 
-  return sendResponse(res, user.toJSON());
+  const { password: _, ...safeUser } = user.toJSON();
+  return sendResponse(res, safeUser);
 }
 
 export async function deleteUser(req: Request, res: Response) {

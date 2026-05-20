@@ -19,6 +19,7 @@ import {
 import {
   createExercise,
   getExercises,
+  getExerciseById,
   deleteExercise,
   updateExercise,
 } from "./handlers/exercises";
@@ -55,7 +56,7 @@ router.delete("/users", [userAuth], deleteUser);
 const exercisesById = "/exercises/:exerciseId";
 router.get("/exercises", [userAuth], getExercises);
 router.post("/exercises", [userAuth], createExercise);
-router.get(`${exercisesById}`, [userAuth, validateIdParams], getExercises);
+router.get(`${exercisesById}`, [userAuth, validateIdParams], getExerciseById);
 router.put(`${exercisesById}`, [userAuth, validateIdParams], updateExercise);
 router.delete(`${exercisesById}`, [userAuth, validateIdParams], deleteExercise);
 
