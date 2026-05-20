@@ -1,3 +1,4 @@
+import { QueryTypes } from "sequelize";
 import { Request, Response } from "express";
 
 import Exercise from "src/database/models/exercise.model";
@@ -83,18 +84,26 @@ export async function deleteExerciseSet(
   req: Request<{ exerciseId: string; setId: string }>,
   res: Response
 ) {
-  const [e, s] = await Promise.all([
-    Exercise.findOne({
-      where: { id: req.params.exerciseId, userId: req.user.id },
-    }),
-    ExerciseSet.findOne({
-      where: { id: req.params.setId, exerciseId: req.params.exerciseId },
-    }),
-  ]);
+  const deleted = await ExerciseSet.sequelize!.query<{ id: string }>(
+    `DELETE FROM sets
+     WHERE id = :setId
+       AND "exerciseId" = :exerciseId
+       AND EXISTS (
+         SELECT 1 FROM exercises
+         WHERE id = :exerciseId AND "userId" = :userId
+       )
+     RETURNING id`,
+    {
+      replacements: {
+        setId: req.params.setId,
+        exerciseId: req.params.exerciseId,
+        userId: req.user.id,
+      },
+      type: QueryTypes.SELECT,
+    }
+  );
 
-  if (!e || !s) return sendError(res, 404, "Set not found");
-
-  await s.destroy();
+  if (deleted.length === 0) return sendError(res, 404, "Set not found");
 
   return sendResponse(res);
 }

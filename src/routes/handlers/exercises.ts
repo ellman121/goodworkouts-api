@@ -1,7 +1,9 @@
+import { Op } from "sequelize";
 import { Request, Response } from "express";
 
 import Exercise from "src/database/models/exercise.model";
 import ExerciseSet from "src/database/models/exerciseSet.model";
+import Routine from "src/database/models/routine.model";
 import { validateRequestBody } from "src/utils/validation";
 import { sendError, sendResponse } from "src/utils/responses";
 
@@ -76,8 +78,19 @@ export async function deleteExercise(
   await Promise.all([
     ExerciseSet.destroy({ where: { exerciseId: req.params.exerciseId } }),
     e.destroy(),
-    // TODO: Remove this exercise from any routines that reference it
   ]);
+
+  const affectedRoutines = await Routine.findAll({
+    where: {
+      userId: req.user.id,
+      exercises: { [Op.contains]: [req.params.exerciseId] },
+    },
+  });
+  await Promise.all(
+    affectedRoutines.map((r) =>
+      r.update({ exercises: r.exercises.filter((id) => id !== req.params.exerciseId) })
+    )
+  );
 
   return sendResponse(res);
 }

@@ -28,7 +28,7 @@ export default class Routine extends Model<
   @Column({ type: DataType.STRING })
   declare name: string;
 
-  @Column({ type: DataType.UUID })
+  @Column({ type: DataType.ARRAY(DataType.UUID) })
   declare exercises: string[];
 
   @ForeignKey(() => User)

@@ -35,6 +35,8 @@ export async function getRoutineById(
 
 async function allExercisesAreValid(exercises: string[], userId: string) {
   const uniqueExerciseIds = uniq(exercises);
+  if (uniqueExerciseIds.length === 0) return true;
+
   const { count } = await Exercise.findAndCountAll({
     where: { userId, id: { [Op.in]: uniqueExerciseIds } },
   });
