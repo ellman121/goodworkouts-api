@@ -16,13 +16,13 @@ export async function getRoutines(req: Request, res: Response) {
 
   return sendResponse(
     res,
-    routines.map((r) => r.toJSON())
+    routines.map((r) => r.toJSON()),
   );
 }
 
 export async function getRoutineById(
   req: Request<{ routineId: string }>,
-  res: Response
+  res: Response,
 ) {
   const routine = await Routine.findOne({
     where: { id: req.params.routineId, userId: req.user.id },
@@ -45,7 +45,7 @@ async function allExercisesAreValid(exercises: string[], userId: string) {
 }
 
 export async function createRoutine(req: Request, res: Response) {
-  const v = await validateRequestBody(routineBodySchema, req.body);
+  const v = validateRequestBody(routineBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -55,7 +55,7 @@ export async function createRoutine(req: Request, res: Response) {
     return sendError(
       res,
       400,
-      "Exercises array contains invalid exercise UUIDs"
+      "Exercises array contains invalid exercise UUIDs",
     );
   }
 
@@ -70,9 +70,9 @@ export async function createRoutine(req: Request, res: Response) {
 
 export async function updateRoutine(
   req: Request<{ routineId: string }>,
-  res: Response
+  res: Response,
 ) {
-  const v = await validateRequestBody(routineBodySchema, req.body);
+  const v = validateRequestBody(routineBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -82,7 +82,7 @@ export async function updateRoutine(
     return sendError(
       res,
       400,
-      "Exercises array contains invalid exercise UUIDs"
+      "Exercises array contains invalid exercise UUIDs",
     );
   }
 
@@ -102,7 +102,7 @@ export async function updateRoutine(
 
 export async function deleteRoutine(
   req: Request<{ routineId: string }>,
-  res: Response
+  res: Response,
 ) {
   const routine = await Routine.findOne({
     where: { id: req.params.routineId, userId: req.user.id },

@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 
 const sequelize = new Sequelize({
@@ -11,6 +12,18 @@ const sequelize = new Sequelize({
   modelMatch: (filename, member) =>
     filename.substring(0, filename.indexOf(".model")) === member.toLowerCase(),
 });
+
+/**
+ * @function withTransaction
+ * @description Executes the provided `work` function in a transaction which
+ * commits at the end or rolls back on any `throw`.
+ * @param work Function which will be executed in the transaction context
+ */
+export async function withTransaction<T>(
+  work: (transaction: Transaction) => Promise<T>,
+) {
+  return await sequelize.transaction(work);
+}
 
 export async function initDatabase() {
   await sequelize.authenticate();

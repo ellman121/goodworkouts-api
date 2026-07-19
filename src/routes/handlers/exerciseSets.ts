@@ -10,7 +10,7 @@ import { setBodySchema } from "./schemas";
 
 export async function getExerciseSets(
   req: Request<{ exerciseId: string }>,
-  res: Response
+  res: Response,
 ) {
   const e = await Exercise.findOne({
     attributes: ["id", "name"],
@@ -33,9 +33,9 @@ export async function getExerciseSets(
 
 export async function createExerciseSet(
   req: Request<{ exerciseId: string }>,
-  res: Response
+  res: Response,
 ) {
-  const v = await validateRequestBody(setBodySchema, req.body);
+  const v = validateRequestBody(setBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -55,9 +55,9 @@ export async function createExerciseSet(
 
 export async function updateExerciseSet(
   req: Request<{ exerciseId: string; setId: string }>,
-  res: Response
+  res: Response,
 ) {
-  const v = await validateRequestBody(setBodySchema, req.body);
+  const v = validateRequestBody(setBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -82,7 +82,7 @@ export async function updateExerciseSet(
 
 export async function deleteExerciseSet(
   req: Request<{ exerciseId: string; setId: string }>,
-  res: Response
+  res: Response,
 ) {
   const deleted = await ExerciseSet.sequelize!.query<{ id: string }>(
     `DELETE FROM sets
@@ -100,7 +100,7 @@ export async function deleteExerciseSet(
         userId: req.user.id,
       },
       type: QueryTypes.SELECT,
-    }
+    },
   );
 
   if (deleted.length === 0) return sendError(res, 404, "Set not found");

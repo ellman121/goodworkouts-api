@@ -1,8 +1,11 @@
 import { createSecretKey } from "crypto";
 import { jwtVerify, SignJWT } from "jose";
 
-interface JWTPayload {
+export type TokenType = "access" | "refresh";
+
+interface TokenClaims {
   userId: string;
+  type: TokenType;
 }
 
 const secret = process.env.JWT_SECRET;
@@ -11,30 +14,46 @@ if (secret.length < 32)
   throw new Error("JWT_SECRET must be at least 32 characters");
 const secretKey = createSecretKey(Buffer.from(secret));
 
-// Expire times are either 3h or 30d in seconds
-export async function generateJWT(p: JWTPayload, expireTime: "10800s" | "2592000s") {
-  const token = await new SignJWT({
-    ...p,
-  })
+// Access tokens are short-lived; refresh tokens last a month so a client stays
+// signed in between sessions.
+const tokenTTL: Record<TokenType, string> = {
+  access: "10800s", // 3h
+  refresh: "2592000s", // 30d
+};
+
+// The type is signed into the token, so a refresh token cannot be replayed as
+// an access token (or vice versa) — each is only accepted where it belongs.
+export async function generateJWT(userId: string, type: TokenType) {
+  return new SignJWT({ userId, type })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setIssuer("goodworkouts")
     .setAudience("goodworkouts")
-    .setExpirationTime(expireTime)
+    .setExpirationTime(tokenTTL[type])
     .sign(secretKey);
-  return token;
 }
 
-export async function validateJWT(hash: string) {
+export async function generateTokenPair(userId: string) {
+  const [token, refreshToken] = await Promise.all([
+    generateJWT(userId, "access"),
+    generateJWT(userId, "refresh"),
+  ]);
+
+  return { token, refreshToken };
+}
+
+export async function validateJWT(hash: string, expectedType: TokenType) {
   try {
-    const token = await jwtVerify<JWTPayload>(hash, secretKey, {
+    const { payload } = await jwtVerify<TokenClaims>(hash, secretKey, {
       audience: "goodworkouts",
       issuer: "goodworkouts",
-    })
+    });
+
+    if (payload.type !== expectedType) return { valid: false, payload: null };
 
     return {
       valid: true,
-      payload: token.payload,
+      payload,
     };
   } catch (_) {
     // Swallow JWT errors

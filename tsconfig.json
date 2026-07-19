@@ -11,6 +11,6 @@
     "paths": {
       "src/*": ["./src/*"]
     },
-    "strict": true,
+    "strict": true
   }
 }

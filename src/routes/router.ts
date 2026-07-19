@@ -49,7 +49,9 @@ const authLimiter = rateLimit({
 // uncaught throw would take down the whole process. Every handler goes
 // through this guard so unexpected errors become 500 responses instead.
 const safe =
-  <Req extends Request>(handler: (req: Req, res: Response) => Promise<unknown>) =>
+  <Req extends Request>(
+    handler: (req: Req, res: Response) => Promise<unknown>,
+  ) =>
   async (req: Req, res: Response) => {
     try {
       return await handler(req, res);
@@ -82,23 +84,63 @@ router.delete("/users", [userAuth], safe(deleteUser));
 const exercisesById = "/exercises/:exerciseId";
 router.get("/exercises", [userAuth], safe(getExercises));
 router.post("/exercises", [userAuth], safe(createExercise));
-router.get(`${exercisesById}`, [userAuth, validateIdParams], safe(getExerciseById));
-router.put(`${exercisesById}`, [userAuth, validateIdParams], safe(updateExercise));
-router.delete(`${exercisesById}`, [userAuth, validateIdParams], safe(deleteExercise));
+router.get(
+  `${exercisesById}`,
+  [userAuth, validateIdParams],
+  safe(getExerciseById),
+);
+router.put(
+  `${exercisesById}`,
+  [userAuth, validateIdParams],
+  safe(updateExercise),
+);
+router.delete(
+  `${exercisesById}`,
+  [userAuth, validateIdParams],
+  safe(deleteExercise),
+);
 
 // Exercise Set
 const setsById = "/sets/:setId";
-router.get(`${exercisesById}/sets`, [userAuth, validateIdParams], safe(getExerciseSets));
-router.post(`${exercisesById}/sets`, [userAuth, validateIdParams], safe(createExerciseSet));
-router.put(`${exercisesById}${setsById}`, [userAuth, validateIdParams], safe(updateExerciseSet) );
-router.delete(`${exercisesById}${setsById}`, [userAuth, validateIdParams], safe(deleteExerciseSet));
+router.get(
+  `${exercisesById}/sets`,
+  [userAuth, validateIdParams],
+  safe(getExerciseSets),
+);
+router.post(
+  `${exercisesById}/sets`,
+  [userAuth, validateIdParams],
+  safe(createExerciseSet),
+);
+router.put(
+  `${exercisesById}${setsById}`,
+  [userAuth, validateIdParams],
+  safe(updateExerciseSet),
+);
+router.delete(
+  `${exercisesById}${setsById}`,
+  [userAuth, validateIdParams],
+  safe(deleteExerciseSet),
+);
 
 // Routines
 const routinesById = "/routines/:routineId";
 router.get("/routines", [userAuth], safe(getRoutines));
 router.post("/routines", [userAuth], safe(createRoutine));
-router.get(`${routinesById}`, [userAuth, validateIdParams], safe(getRoutineById));
-router.put(`${routinesById}`, [userAuth, validateIdParams], safe(updateRoutine));
-router.delete(`${routinesById}`, [userAuth, validateIdParams], safe(deleteRoutine));
+router.get(
+  `${routinesById}`,
+  [userAuth, validateIdParams],
+  safe(getRoutineById),
+);
+router.put(
+  `${routinesById}`,
+  [userAuth, validateIdParams],
+  safe(updateRoutine),
+);
+router.delete(
+  `${routinesById}`,
+  [userAuth, validateIdParams],
+  safe(deleteRoutine),
+);
 
 export default router;

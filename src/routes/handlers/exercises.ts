@@ -16,13 +16,13 @@ export async function getExercises(req: Request, res: Response) {
 
   return sendResponse(
     res,
-    es.map((e) => e.toJSON())
+    es.map((e) => e.toJSON()),
   );
 }
 
 export async function getExerciseById(
   req: Request<{ exerciseId: string }>,
-  res: Response
+  res: Response,
 ) {
   const exercise = await Exercise.findOne({
     where: { id: req.params.exerciseId, userId: req.user.id },
@@ -34,7 +34,7 @@ export async function getExerciseById(
 }
 
 export async function createExercise(req: Request, res: Response) {
-  const v = await validateRequestBody(exerciseBodySchema, req.body);
+  const v = validateRequestBody(exerciseBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -48,9 +48,9 @@ export async function createExercise(req: Request, res: Response) {
 
 export async function updateExercise(
   req: Request<{ exerciseId: string }>,
-  res: Response
+  res: Response,
 ) {
-  const v = await validateRequestBody(exerciseBodySchema, req.body);
+  const v = validateRequestBody(exerciseBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -67,7 +67,7 @@ export async function updateExercise(
 
 export async function deleteExercise(
   req: Request<{ exerciseId: string }>,
-  res: Response
+  res: Response,
 ) {
   const e = await Exercise.findOne({
     where: { id: req.params.exerciseId, userId: req.user.id },
@@ -88,8 +88,10 @@ export async function deleteExercise(
   });
   await Promise.all(
     affectedRoutines.map((r) =>
-      r.update({ exercises: r.exercises.filter((id) => id !== req.params.exerciseId) })
-    )
+      r.update({
+        exercises: r.exercises.filter((id) => id !== req.params.exerciseId),
+      }),
+    ),
   );
 
   return sendResponse(res);

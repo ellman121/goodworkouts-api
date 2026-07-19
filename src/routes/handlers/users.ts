@@ -4,6 +4,8 @@ import { timingSafeEqual } from "crypto";
 import { UniqueConstraintError } from "sequelize";
 
 import User from "src/database/models/user.model";
+import Exercise from "src/database/models/exercise.model";
+import { withTransaction } from "src/database";
 import { sendError, sendResponse } from "src/utils/responses";
 import { validateRequestBody } from "src/utils/validation";
 import { createUserBodySchema, updateUserBodySchema } from "./schemas";
@@ -11,6 +13,19 @@ import { createUserBodySchema, updateUserBodySchema } from "./schemas";
 // Signup is invite-only while the app is in alpha
 const inviteCode = process.env.INVITE_CODE;
 if (!inviteCode) throw new Error("INVITE_CODE env var is not set");
+
+const DEFAULT_EXERCISES = [
+  "Bench Press",
+  "Squat",
+  "Deadlift",
+  "Overhead Press",
+  "Barbell Row",
+  "Pull-Up",
+  "Lat Pulldown",
+  "Dumbbell Curl",
+  "Tricep Pushdown",
+  "Leg Press",
+];
 
 // Constant-time invite-code check. Length is guarded first (timingSafeEqual
 // throws on unequal-length buffers), then bytes are compared without early-out.
@@ -35,7 +50,7 @@ export async function getLoggedInUserInfo(req: Request, res: Response) {
 }
 
 export async function createUser(req: Request, res: Response) {
-  const v = await validateRequestBody(createUserBodySchema, req.body);
+  const v = validateRequestBody(createUserBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
@@ -45,28 +60,38 @@ export async function createUser(req: Request, res: Response) {
 
   const hashedPassword = await bcrypt.hash(userFields.password, 10);
 
-  let user: User;
   try {
-    user = await User.create({ ...userFields, password: hashedPassword });
+    const newUser = await withTransaction(async (transaction) => {
+      const newUser = await User.create(
+        { ...userFields, password: hashedPassword },
+        { transaction },
+      );
+
+      await Exercise.bulkCreate(
+        DEFAULT_EXERCISES.map((name) => ({ name, userId: newUser.id })),
+        { transaction },
+      );
+
+      return newUser;
+    });
+
+    const { password: _, ...safeUser } = newUser.toJSON();
+    return sendResponse(res, safeUser);
   } catch (error) {
     if (error instanceof UniqueConstraintError)
       return sendError(res, 409, "Username already in use");
     throw error;
   }
-
-  const { password: _, ...safeUser } = user.toJSON();
-  return sendResponse(res, safeUser);
 }
 
 export async function updateUser(req: Request, res: Response) {
-  const v = await validateRequestBody(updateUserBodySchema, req.body);
+  const v = validateRequestBody(updateUserBodySchema, req.body);
   if (!v.body)
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
   const updates = { ...v.body };
-  if (updates.password) 
+  if (updates.password)
     updates.password = await bcrypt.hash(updates.password, 10);
-  
 
   let user: User | null;
   try {

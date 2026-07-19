@@ -34,9 +34,8 @@ export default class ExerciseSet extends Model<
 
   @Column({ type: DataType.ARRAY(DataType.ARRAY(DataType.NUMBER)) })
   set reps(value: RepWeight[]) {
-    if (R.any((v) => v.length !== 2, value)) 
+    if (R.any((v) => v.length !== 2, value))
       throw new Error("Reps must be an array of 2-tuples");
-    
 
     this.setDataValue("reps", value);
   }

@@ -24,7 +24,7 @@ export function sendError<T>(
   res: Response,
   code: keyof typeof defaultErrorMessages,
   message?: string,
-  data?: T
+  data?: T,
 ) {
   return res.status(code).json({
     status: "error",

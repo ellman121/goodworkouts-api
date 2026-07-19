@@ -4,7 +4,14 @@ import {
   CreationOptional,
   NonAttribute,
 } from "sequelize";
-import { Model, Column, DataType, Table, HasMany, DeletedAt } from "sequelize-typescript";
+import {
+  Model,
+  Column,
+  DataType,
+  Table,
+  HasMany,
+  DeletedAt,
+} from "sequelize-typescript";
 
 import Exercise from "./exercise.model";
 import Routine from "./routine.model";

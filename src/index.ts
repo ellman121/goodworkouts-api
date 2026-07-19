@@ -33,7 +33,7 @@ app.use(
     windowMs: 10 * 1000, // 10 mins
     standardHeaders: true,
     legacyHeaders: false,
-  })
+  }),
 );
 // NOTE: behind a proxy/load balancer, set app.set("trust proxy", <hop count>)
 // so req.ip (and thus rate limiting) reflects the real client, not the proxy.

@@ -9,14 +9,14 @@ const isUUID = (value: string) => validate(value);
 export function validateIdParams(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   for (const [param, value] of Object.entries(req.params)) {
     if (isIdParam(param) && !isUUID(value)) {
       return sendError(
         res,
         400,
-        `Invalid request: '${value}' is not a valid UUID`
+        `Invalid request: '${value}' is not a valid UUID`,
       );
     }
   }

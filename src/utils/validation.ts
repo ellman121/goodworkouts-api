@@ -3,18 +3,17 @@ import { AnySchema, JTDDataType } from "ajv/dist/core";
 
 const ajv = new Ajv();
 
-export async function validateRequestBody<T extends AnySchema>(
+export function validateRequestBody<T extends AnySchema>(
   schema: T,
-  body: unknown
-): Promise<{
+  body: unknown,
+): {
   errorMessages: string[];
   body?: JTDDataType<T>;
-}> {
+} {
   try {
     const v = ajv.validate(schema, body);
     const errors = ajv.errors; // Extract to prevent a race condition
-    if (!v)
-      return { errorMessages: errors?.map((e) => e.message ?? "") ?? [] };
+    if (!v) return { errorMessages: errors?.map((e) => e.message ?? "") ?? [] };
 
     return {
       errorMessages: [],
