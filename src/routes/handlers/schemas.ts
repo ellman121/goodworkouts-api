@@ -21,7 +21,7 @@ export const updateUserBodySchema = {
   type: "object",
   properties: {
     username: { type: "string" },
-    password: { type: "string" },
+    password: { type: "string", minLength: 8 },
   },
   additionalProperties: false,
 } as const;

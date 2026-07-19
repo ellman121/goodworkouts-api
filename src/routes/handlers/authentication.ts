@@ -8,6 +8,10 @@ import { generateJWT, validateJWT } from "src/utils/jtw";
 
 import { loginBodySchema, reauthenticateBodySchema } from "./schemas";
 
+// A fixed valid bcrypt hash compared against when the user is absent, so login
+// timing does not reveal whether a username exists.
+const DUMMY_HASH = "$2b$10$ms1r2T1Ply37nPAqNEnGxOoegxCVveZnKZM2rrHIzk/xzP/.VuyX.";
+
 export async function login(req: Request, res: Response) {
   const v = await validateRequestBody(loginBodySchema, req.body);
   if (!v.body)
@@ -17,7 +21,12 @@ export async function login(req: Request, res: Response) {
     where: { username: v.body.username },
   });
 
-  if (!user || !(await bcrypt.compare(v.body.password, user.password)))
+  const passwordMatches = await bcrypt.compare(
+    v.body.password,
+    user?.password ?? DUMMY_HASH
+  );
+
+  if (!user || !passwordMatches)
     return sendError(res, 401, "Invalid credentials");
 
 

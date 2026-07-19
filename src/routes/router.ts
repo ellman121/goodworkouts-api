@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import rateLimit from "express-rate-limit";
 
 import { sendError } from "src/utils/responses";
 import { userAuth } from "./middleware/injectUser";
@@ -34,6 +35,16 @@ import {
 
 const router = Router();
 
+// Strict limiter for credential-checking routes to blunt brute-force /
+// credential-stuffing. Keyed per-IP by default; behind a proxy the deployment
+// must set app.set("trust proxy", <hop count>) for req.ip to be accurate.
+const authLimiter = rateLimit({
+  max: 10, // 10 attempts
+  windowMs: 15 * 60 * 1000, // per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Express 4 does not catch rejected promises from async handlers — an
 // uncaught throw would take down the whole process. Every handler goes
 // through this guard so unexpected errors become 500 responses instead.
@@ -58,8 +69,8 @@ router.get("/", (_, res) => {
 });
 
 // Authentication
-router.post("/login", [], safe(login));
-router.post("/reauthenticate", [], safe(reauthenticate));
+router.post("/login", [authLimiter], safe(login));
+router.post("/reauthenticate", [authLimiter], safe(reauthenticate));
 
 // User
 router.get("/users", [userAuth], safe(getLoggedInUserInfo));

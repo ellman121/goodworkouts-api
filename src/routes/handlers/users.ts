@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
+import { timingSafeEqual } from "crypto";
 import { UniqueConstraintError } from "sequelize";
 
 import User from "src/database/models/user.model";
@@ -10,6 +11,17 @@ import { createUserBodySchema, updateUserBodySchema } from "./schemas";
 // Signup is invite-only while the app is in alpha
 const inviteCode = process.env.INVITE_CODE;
 if (!inviteCode) throw new Error("INVITE_CODE env var is not set");
+
+// Constant-time invite-code check. Length is guarded first (timingSafeEqual
+// throws on unequal-length buffers), then bytes are compared without early-out.
+const expectedInviteCode = new TextEncoder().encode(inviteCode);
+const inviteCodeMatches = (provided: string) => {
+  const a = new TextEncoder().encode(provided);
+  return (
+    a.length === expectedInviteCode.length &&
+    timingSafeEqual(a, expectedInviteCode)
+  );
+};
 
 export async function getLoggedInUserInfo(req: Request, res: Response) {
   const user = await User.findOne({
@@ -28,7 +40,7 @@ export async function createUser(req: Request, res: Response) {
     return sendError(res, 400, "Invalid request body", v.errorMessages);
 
   const { inviteCode: providedInviteCode, ...userFields } = v.body;
-  if (providedInviteCode !== inviteCode)
+  if (!inviteCodeMatches(providedInviteCode))
     return sendError(res, 403, "Invalid invite code");
 
   const hashedPassword = await bcrypt.hash(userFields.password, 10);

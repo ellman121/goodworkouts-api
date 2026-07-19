@@ -11,9 +11,10 @@ export async function validateRequestBody<T extends AnySchema>(
   body?: JTDDataType<T>;
 }> {
   try {
-    const v = await ajv.validate(schema, body);
+    const v = ajv.validate(schema, body);
+    const errors = ajv.errors; // Extract to prevent a race condition
     if (!v)
-      return { errorMessages: ajv.errors?.map((e) => e.message ?? "") ?? [] };
+      return { errorMessages: errors?.map((e) => e.message ?? "") ?? [] };
 
     return {
       errorMessages: [],

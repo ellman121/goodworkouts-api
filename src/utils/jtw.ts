@@ -7,6 +7,8 @@ interface JWTPayload {
 
 const secret = process.env.JWT_SECRET;
 if (!secret) throw new Error("JWT_SECRET env var is not set");
+if (secret.length < 32)
+  throw new Error("JWT_SECRET must be at least 32 characters");
 const secretKey = createSecretKey(Buffer.from(secret));
 
 // Expire times are either 3h or 30d in seconds
