@@ -21,7 +21,6 @@ export const updateUserBodySchema = {
   type: "object",
   properties: {
     username: { type: "string" },
-    email: { type: "string" },
     password: { type: "string" },
   },
   additionalProperties: false,
@@ -29,7 +28,11 @@ export const updateUserBodySchema = {
 
 export const createUserBodySchema = {
   ...updateUserBodySchema,
-  required: ["username", "email", "password"],
+  properties: {
+    ...updateUserBodySchema.properties,
+    inviteCode: { type: "string" },
+  },
+  required: ["username", "password", "inviteCode"],
 } as const;
 
 export const exerciseBodySchema = {

@@ -15,6 +15,7 @@ const defaultErrorMessages = {
   401: "Unauthorized", // Unauthenticated request. Client didn't send an auth token
   403: "Forbidden", // Forbidden. Client is authenticated, but trying to access something they shouldn't
   404: "Not Found", // Resource not found / doesn't exist
+  409: "Conflict", // Request conflicts with existing state (e.g. duplicate unique value)
   429: "Rate limit exceeded", // Client is making too many requests, too quickly
   500: "Internal Server Error", // Something's gone wrong on the backend
 };

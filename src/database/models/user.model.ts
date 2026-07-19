@@ -22,9 +22,6 @@ export default class User extends Model<
   declare id: CreationOptional<string>;
 
   @Column({ type: DataType.STRING })
-  declare email: string;
-
-  @Column({ type: DataType.STRING })
   declare username: string;
 
   @Column({ type: DataType.STRING })

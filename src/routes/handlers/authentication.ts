@@ -17,12 +17,12 @@ export async function login(req: Request, res: Response) {
     where: { username: v.body.username },
   });
 
-  if (!user || !(await bcrypt.compare(v.body.password, user.password))) 
+  if (!user || !(await bcrypt.compare(v.body.password, user.password)))
     return sendError(res, 401, "Invalid credentials");
-  
+
 
   const token = await generateJWT({ userId: user.id }, "10800s");
-  const refreshToken = await generateJWT({ userId: user.id }, "604800s");
+  const refreshToken = await generateJWT({ userId: user.id }, "2592000s");
 
   return sendResponse(res, { token, refreshToken });
 }
@@ -42,7 +42,7 @@ export async function reauthenticate(req: Request, res: Response) {
   if (!user) return sendError(res, 404, "User not found");
 
   const token = await generateJWT({ userId: user.id }, "10800s");
-  const refreshToken = await generateJWT({ userId: user.id }, "604800s");
+  const refreshToken = await generateJWT({ userId: user.id }, "2592000s");
 
   return sendResponse(res, { token, refreshToken });
 }

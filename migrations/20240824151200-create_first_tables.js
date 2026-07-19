@@ -1,12 +1,5 @@
 "use strict";
 
-const exampleUser = {
-  id: "6c677a30-e584-43df-a552-b47a7a95a0b4",
-  email: "example@test.com",
-  username: "exampleUser",
-  password: "fakePassword",
-};
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -22,17 +15,20 @@ module.exports = {
 
     const nonNullString = { type: Sequelize.STRING, allowNull: false };
 
-    await queryInterface
-      .createTable("users", {
-        ...base,
-        email: nonNullString,
-        username: nonNullString,
-        password: nonNullString,
-        deletedAt: { type: Sequelize.DATE, allowNull: true },
-      })
-      .then(() => {
-        queryInterface.insert(null, "users", exampleUser);
-      });
+    await queryInterface.createTable("users", {
+      ...base,
+      username: nonNullString,
+      password: nonNullString,
+      deletedAt: { type: Sequelize.DATE, allowNull: true },
+    });
+
+    // Partial index: users are soft-deleted, and a plain unique constraint
+    // would let a deleted account block its username forever.
+    await queryInterface.sequelize.query(`
+      CREATE UNIQUE INDEX "users_username_unique_active"
+      ON "users" ("username")
+      WHERE "deletedAt" IS NULL;
+      `);
 
     await queryInterface.createTable("exercises", {
       ...base,

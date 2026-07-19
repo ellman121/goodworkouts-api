@@ -1,5 +1,6 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 
+import { sendError } from "src/utils/responses";
 import { userAuth } from "./middleware/injectUser";
 import { validateIdParams } from "./middleware/validateUUIDs";
 
@@ -33,6 +34,20 @@ import {
 
 const router = Router();
 
+// Express 4 does not catch rejected promises from async handlers — an
+// uncaught throw would take down the whole process. Every handler goes
+// through this guard so unexpected errors become 500 responses instead.
+const safe =
+  <Req extends Request>(handler: (req: Req, res: Response) => Promise<unknown>) =>
+  async (req: Req, res: Response) => {
+    try {
+      return await handler(req, res);
+    } catch (error) {
+      console.error(`Unhandled error in ${req.method} ${req.path}:`, error);
+      if (!res.headersSent) sendError(res, 500);
+    }
+  };
+
 // I don't like the ugly code to make this eslint rule go away when
 // passing handler functions to the router. Since this entire file
 // is just router.method() calls, I just disable the rule here
@@ -43,36 +58,36 @@ router.get("/", (_, res) => {
 });
 
 // Authentication
-router.post("/login", [], login);
-router.post("/reauthenticate", [], reauthenticate);
+router.post("/login", [], safe(login));
+router.post("/reauthenticate", [], safe(reauthenticate));
 
 // User
-router.get("/users", [userAuth], getLoggedInUserInfo);
-router.post("/users", [], createUser);
-router.put("/users", [userAuth], updateUser);
-router.delete("/users", [userAuth], deleteUser);
+router.get("/users", [userAuth], safe(getLoggedInUserInfo));
+router.post("/users", [], safe(createUser));
+router.put("/users", [userAuth], safe(updateUser));
+router.delete("/users", [userAuth], safe(deleteUser));
 
 // Exercise
 const exercisesById = "/exercises/:exerciseId";
-router.get("/exercises", [userAuth], getExercises);
-router.post("/exercises", [userAuth], createExercise);
-router.get(`${exercisesById}`, [userAuth, validateIdParams], getExerciseById);
-router.put(`${exercisesById}`, [userAuth, validateIdParams], updateExercise);
-router.delete(`${exercisesById}`, [userAuth, validateIdParams], deleteExercise);
+router.get("/exercises", [userAuth], safe(getExercises));
+router.post("/exercises", [userAuth], safe(createExercise));
+router.get(`${exercisesById}`, [userAuth, validateIdParams], safe(getExerciseById));
+router.put(`${exercisesById}`, [userAuth, validateIdParams], safe(updateExercise));
+router.delete(`${exercisesById}`, [userAuth, validateIdParams], safe(deleteExercise));
 
 // Exercise Set
 const setsById = "/sets/:setId";
-router.get(`${exercisesById}/sets`, [userAuth, validateIdParams], getExerciseSets);
-router.post(`${exercisesById}/sets`, [userAuth, validateIdParams], createExerciseSet);
-router.put(`${exercisesById}${setsById}`, [userAuth, validateIdParams], updateExerciseSet );
-router.delete(`${exercisesById}${setsById}`, [userAuth, validateIdParams], deleteExerciseSet);
+router.get(`${exercisesById}/sets`, [userAuth, validateIdParams], safe(getExerciseSets));
+router.post(`${exercisesById}/sets`, [userAuth, validateIdParams], safe(createExerciseSet));
+router.put(`${exercisesById}${setsById}`, [userAuth, validateIdParams], safe(updateExerciseSet) );
+router.delete(`${exercisesById}${setsById}`, [userAuth, validateIdParams], safe(deleteExerciseSet));
 
 // Routines
 const routinesById = "/routines/:routineId";
-router.get("/routines", [userAuth], getRoutines);
-router.post("/routines", [userAuth], createRoutine);
-router.get(`${routinesById}`, [userAuth, validateIdParams], getRoutineById);
-router.put(`${routinesById}`, [userAuth, validateIdParams], updateRoutine);
-router.delete(`${routinesById}`, [userAuth, validateIdParams], deleteRoutine);
+router.get("/routines", [userAuth], safe(getRoutines));
+router.post("/routines", [userAuth], safe(createRoutine));
+router.get(`${routinesById}`, [userAuth, validateIdParams], safe(getRoutineById));
+router.put(`${routinesById}`, [userAuth, validateIdParams], safe(updateRoutine));
+router.delete(`${routinesById}`, [userAuth, validateIdParams], safe(deleteRoutine));
 
 export default router;
